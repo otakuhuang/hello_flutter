@@ -41,22 +41,41 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+class Pair {
+  WordPair word;
+  bool favorite;
 
-  void getNext() {
-    current = WordPair.random();
+  Pair(this.word, this.favorite);
+} 
+
+class MyAppState extends ChangeNotifier {
+  var pairs = <Pair>[];
+  var index = -1;
+  var current = Pair(WordPair.random(), false);
+
+  void getPrev() {
+    if (index <= 0) {
+      current = pairs[0];
+    } else {
+      current = pairs[index];
+      index--;
+    }
     notifyListeners();
   }
 
-  var favorties = <WordPair>{};
-
-  void toggleFavortie() {
-    if (favorties.contains(current)) {
-      favorties.remove(current);
+  void getNext() {
+    index++;
+    if (index < pairs.length) {
+      current = pairs[index];
     } else {
-      favorties.add(current);
+      current = Pair(WordPair.random(), false);
+      pairs.add(current);
     }
+    notifyListeners();
+  }
+
+  void toggleFavortie(Pair pair) {
+    pair.favorite = !pair.favorite;
     notifyListeners();
   }
 }
@@ -131,7 +150,7 @@ class GeneratorPage extends StatelessWidget {
     var pair = appState.current;
 
     IconData icon;
-    if (appState.favorties.contains(pair)) {
+    if (pair.favorite) {
       icon = Icons.favorite;
     } else {
       icon = Icons.favorite_border;
@@ -148,10 +167,17 @@ class GeneratorPage extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 onPressed: () {
-                  appState.toggleFavortie();
+                  appState.toggleFavortie(pair);
                 },
                 label: Text('Like'),
                 icon: Icon(icon),
+              ),
+              SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  appState.getPrev();
+                },
+                child: Text('Prev'),
               ),
               SizedBox(width: 10),
               ElevatedButton(
@@ -171,7 +197,7 @@ class GeneratorPage extends StatelessWidget {
 class BigCard extends StatelessWidget {
   const BigCard({super.key, required this.pair});
 
-  final WordPair pair;
+  final Pair pair;
 
   @override
   Widget build(BuildContext context) {
@@ -185,9 +211,9 @@ class BigCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Text(
-          pair.asLowerCase,
+          pair.word.asLowerCase,
           style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
+          semanticsLabel: "${pair.word.first} ${pair.word.second}",
         ),
       ),
     );
@@ -199,7 +225,8 @@ class FavoritesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
 
-    if (appState.favorties.isEmpty) {
+    var favorites = appState.pairs.where((p) => p.favorite).toList();
+    if (favorites.isEmpty) {
       return Center(child: Text('No favorites yet.'));
     }
 
@@ -207,12 +234,12 @@ class FavoritesPage extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(20),
-          child: Text('You have ${appState.favorties.length} favorites:'),
+          child: Text('You have ${favorites.length} favorites:'),
         ),
-        for (var pair in appState.favorties)
+        for (var pair in favorites)
           ListTile(
             leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
+            title: Text(pair.word.asLowerCase),
           ),
       ],
     );
