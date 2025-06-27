@@ -156,13 +156,6 @@ class GeneratorPage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
 
-    IconData icon;
-    if (pair.favorite) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -171,6 +164,7 @@ class GeneratorPage extends StatelessWidget {
             flex: 3,
             child: HistoryListView(),
           ),
+          SizedBox(height: 10,),
           BigCard(pair: pair),
           SizedBox(height: 10),
           Row(
@@ -181,7 +175,7 @@ class GeneratorPage extends StatelessWidget {
                   appState.toggleFavortie(pair);
                 },
                 label: Text('Like'),
-                icon: Icon(icon),
+                icon: Icon(pair.favorite ? Icons.favorite : Icons.favorite_border),
               ),
               SizedBox(width: 10),
               ElevatedButton(
@@ -199,6 +193,7 @@ class GeneratorPage extends StatelessWidget {
               ),
             ],
           ),
+          Spacer(flex: 2,),
         ],
       ),
     );
