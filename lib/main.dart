@@ -80,6 +80,11 @@ class MyAppState extends ChangeNotifier {
     pair.favorite = !pair.favorite;
     notifyListeners();
   }
+  
+  void removeFavorite(Pair pair) {
+    pair.favorite = false;
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -280,6 +285,7 @@ class BigCard extends StatelessWidget {
 class FavoritesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var theme = Theme.of(context);
     var appState = context.watch<MyAppState>();
 
     var favorites = appState.pairs.where((p) => p.favorite).toList();
@@ -287,17 +293,32 @@ class FavoritesPage extends StatelessWidget {
       return Center(child: Text('No favorites yet.'));
     }
 
-    return ListView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(30),
           child: Text('You have ${favorites.length} favorites:'),
         ),
-        for (var pair in favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.word.asLowerCase),
+        Expanded(
+          child: GridView(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 400, 
+              childAspectRatio: 400 / 80,
+            ),
+            children: [
+              for (var pair in favorites)
+                ListTile(
+                  leading: IconButton(
+                    icon: Icon(Icons.delete_outline, semanticLabel: 'Delete'), 
+                    color: theme.colorScheme.primary,
+                    onPressed: () => appState.removeFavorite(pair),
+                  ),
+                  title: Text(pair.word.asLowerCase, semanticsLabel: pair.word.asPascalCase,),
+                ),
+            ],
           ),
+        ),
       ],
     );
   }
