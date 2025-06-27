@@ -53,6 +53,8 @@ class MyAppState extends ChangeNotifier {
   var index = -1;
   var current = Pair(WordPair.random(), false);
 
+  GlobalKey? historyListKey;
+
   void getPrev() {
     if (index <= 0) {
       current = pairs[0];
@@ -160,6 +162,10 @@ class GeneratorPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Expanded(
+            flex: 3,
+            child: HistoryListView(),
+          ),
           BigCard(pair: pair),
           SizedBox(height: 10),
           Row(
@@ -189,6 +195,57 @@ class GeneratorPage extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class HistoryListView extends StatefulWidget {
+  const HistoryListView({super.key});
+
+  @override
+  State<HistoryListView> createState() => _HistoryListViewState();
+}
+
+class _HistoryListViewState extends State<HistoryListView> {
+  final _key = GlobalKey();
+
+  static const Gradient _maskingGradient = LinearGradient(
+    colors: [Colors.transparent, Colors.black],
+    stops: [0.0, 0.5],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final appState = context.watch<MyAppState>();
+    appState.historyListKey = _key;
+
+    return ShaderMask(
+      shaderCallback: (bounds) => _maskingGradient.createShader(bounds),
+      blendMode: BlendMode.dstIn,
+      child: AnimatedList(
+        key: _key,
+        reverse: false,
+        padding: EdgeInsets.only(top: 100),
+        initialItemCount: appState.pairs.length,
+        itemBuilder: (context, index, animation) {
+          final pair = appState.pairs[index];
+
+          return SizeTransition(
+            sizeFactor: animation,
+            child: Center(
+              child: TextButton.icon(
+                onPressed: () {
+                  appState.toggleFavortie(pair);
+                },
+                icon: pair.favorite ? Icon(Icons.favorite, size: 12,) : Icon(Icons.favorite_border, size: 12,),
+                label: Text(pair.word.asLowerCase, semanticsLabel: pair.word.asPascalCase,),
+              ), 
+            ),
+          );
+        }
       ),
     );
   }
