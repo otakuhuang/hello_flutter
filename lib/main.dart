@@ -272,10 +272,22 @@ class BigCard extends StatelessWidget {
       color: theme.colorScheme.primary,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Text(
-          pair.word.asLowerCase,
-          style: style,
-          semanticsLabel: "${pair.word.first} ${pair.word.second}",
+        child: AnimatedSize(
+          duration: Duration(milliseconds: 200),
+          child: MergeSemantics(
+            child: Wrap(
+              children: [
+                Text(
+                  pair.word.first,
+                  style: style.copyWith(fontWeight: FontWeight.w200),
+                ),
+                Text(
+                  pair.word.second,
+                  style: style.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
