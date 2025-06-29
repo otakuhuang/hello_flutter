@@ -98,6 +98,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var colorScheme = Theme.of(context).colorScheme;
+    
     Widget page;
     switch (selectedIndex) {
       case 0:
@@ -110,24 +112,58 @@ class _MyHomePageState extends State<MyHomePage> {
         throw UnimplementedError('no widget for $selectedIndex');
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Scaffold(
-          body: Row(
+    var mainArea = ColoredBox(
+      color: colorScheme.surfaceVariant,
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 200),
+        child: page,
+      ),
+    );
+
+    return Scaffold(
+      body: LayoutBuilder(builder: (context, constraints) {
+        if (constraints.maxWidth < 450) {
+          return Column(
+            children: [
+              Expanded(child: mainArea),
+              SafeArea(
+                child: BottomNavigationBar(
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.favorite),
+                      label: 'Favorites',
+                    ),
+                  ],
+                  currentIndex: selectedIndex,
+                  onTap: (value) {
+                    setState(() {
+                      selectedIndex = value;
+                    });
+                  },
+                )
+              )
+            ],
+          );
+        } else {
+          return Row(
             children: [
               SafeArea(
                 child: NavigationRail(
                   extended: constraints.maxWidth >= 600,
                   destinations: [
                     NavigationRailDestination(
-                      icon: Icon(Icons.home),
+                      icon: Icon(Icons.home), 
                       label: Text('Home'),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.favorite),
+                      icon: Icon(Icons.favorite), 
                       label: Text('Favorites'),
                     ),
-                  ],
+                  ], 
                   selectedIndex: selectedIndex,
                   onDestinationSelected: (value) {
                     setState(() {
@@ -136,16 +172,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               ),
-              Expanded(
-                child: Container(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  child: page,
-                ),
-              ),
+              Expanded(child: mainArea),
             ],
-          ),
-        );
-      },
+          );
+        }
+      }),
     );
   }
 }
