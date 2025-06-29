@@ -38,14 +38,13 @@ class MyAppState extends ChangeNotifier {
   var index = -1;
   var current = Pair(WordPair.random(), false);
 
-  GlobalKey? historyListKey;
-
   void getPrev() {
     if (index <= 0) {
       current = pairs[0];
+      index = 0;
     } else {
-      current = pairs[index];
       index--;
+      current = pairs[index];
     }
     notifyListeners();
   }
@@ -98,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     var mainArea = ColoredBox(
-      color: colorScheme.surfaceVariant,
+      color: colorScheme.surfaceContainerHighest,
       child: AnimatedSwitcher(
         duration: Duration(milliseconds: 200),
         child: page,
@@ -224,8 +223,6 @@ class HistoryListView extends StatefulWidget {
 }
 
 class _HistoryListViewState extends State<HistoryListView> {
-  final _key = GlobalKey();
-
   static const Gradient _maskingGradient = LinearGradient(
     colors: [Colors.transparent, Colors.black],
     stops: [0.0, 0.5],
@@ -236,30 +233,25 @@ class _HistoryListViewState extends State<HistoryListView> {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<MyAppState>();
-    appState.historyListKey = _key;
 
     return ShaderMask(
       shaderCallback: (bounds) => _maskingGradient.createShader(bounds),
       blendMode: BlendMode.dstIn,
-      child: AnimatedList(
-        key: _key,
+      child: ListView.builder(
         reverse: false,
         padding: EdgeInsets.only(top: 100),
-        initialItemCount: appState.pairs.length,
-        itemBuilder: (context, index, animation) {
+        itemCount: appState.pairs.length,
+        itemBuilder: (context, index) {
           final pair = appState.pairs[index];
 
-          return SizeTransition(
-            sizeFactor: animation,
-            child: Center(
-              child: TextButton.icon(
-                onPressed: () {
-                  appState.toggleFavortie(pair);
-                },
-                icon: pair.favorite ? Icon(Icons.favorite, size: 12,) : Icon(Icons.favorite_border, size: 12,),
-                label: Text(pair.word.asLowerCase, semanticsLabel: pair.word.asPascalCase,),
-              ), 
-            ),
+          return Center(
+            child: TextButton.icon(
+              onPressed: () {
+                appState.toggleFavortie(pair);
+              },
+              icon: pair.favorite ? Icon(Icons.favorite, size: 12,) : Icon(Icons.favorite_border, size: 12,),
+              label: Text(pair.word.asLowerCase, semanticsLabel: pair.word.asPascalCase,),
+            ), 
           );
         }
       ),
