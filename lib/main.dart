@@ -243,6 +243,7 @@ class _HistoryListViewState extends State<HistoryListView> {
         itemCount: appState.pairs.length,
         itemBuilder: (context, index) {
           final pair = appState.pairs[index];
+          final isCurrentWord = pair == appState.current;
 
           return Center(
             child: TextButton.icon(
@@ -250,7 +251,13 @@ class _HistoryListViewState extends State<HistoryListView> {
                 appState.toggleFavortie(pair);
               },
               icon: pair.favorite ? Icon(Icons.favorite, size: 12,) : Icon(Icons.favorite_border, size: 12,),
-              label: Text(pair.word.asLowerCase, semanticsLabel: pair.word.asPascalCase,),
+              label: Text(
+                pair.word.asLowerCase, 
+                semanticsLabel: pair.word.asPascalCase,
+                style: TextStyle(
+                  fontWeight: isCurrentWord ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
             ), 
           );
         }
