@@ -39,23 +39,27 @@ class MyAppState extends ChangeNotifier {
   var current = Pair(WordPair.random(), false);
 
   void getPrev() {
-    if (index <= 0) {
-      current = pairs[0];
-      index = 0;
-    } else {
-      index--;
-      current = pairs[index];
+    if (pairs.isEmpty) {
+      return;
+    }
+    
+    var currentIndex = pairs.indexOf(current);
+    if (currentIndex < pairs.length - 1) {
+      current = pairs[currentIndex + 1];
     }
     notifyListeners();
   }
 
   void getNext() {
-    index++;
-    if (index < pairs.length) {
-      current = pairs[index];
+    var currentIndex = pairs.indexOf(current);
+    if (currentIndex > 0) {
+      current = pairs[currentIndex - 1];
     } else {
-      current = Pair(WordPair.random(), false);
-      pairs.add(current);
+      var newPair = Pair(WordPair.random(), false);
+      current = newPair;
+      if (!pairs.contains(current)) {
+        pairs.insert(0, current);
+      }
     }
     notifyListeners();
   }
@@ -238,7 +242,7 @@ class _HistoryListViewState extends State<HistoryListView> {
       shaderCallback: (bounds) => _maskingGradient.createShader(bounds),
       blendMode: BlendMode.dstIn,
       child: ListView.builder(
-        reverse: false,
+        reverse: true,
         padding: EdgeInsets.only(top: 100),
         itemCount: appState.pairs.length,
         itemBuilder: (context, index) {
